@@ -34,11 +34,12 @@ func menuUser() {
 	fmt.Println("2. Biaya")
 	fmt.Println("3. Jumlah Fasilitasnya")
 	fmt.Println("4. Ketikkan Nama Tempat Rekreasi Yang ingin Anda Cari ")
+	fmt.Println("5. Exit")
 }
 
-func switchRole(a int) {
+func switchRole(choiceRole int) {
 	var choiceAdmin, choiceUser int
-	switch a {
+	switch choiceRole {
 	case 1:
 		for choiceAdmin != 4 {
 			menuAdmin()
@@ -46,7 +47,7 @@ func switchRole(a int) {
 			switchAdmin(choiceAdmin)
 		}
 	case 2:
-		for choiceUser != 4 {
+		for choiceUser != 5 {
 			menuUser()
 			fmt.Scan(&choiceUser)
 			switchUser(choiceUser)
@@ -54,84 +55,114 @@ func switchRole(a int) {
 	}
 }
 
-func switchAdmin(a int) {
-	var b, jarak, idxAkun int
-	var nama string
-	switch a {
+func switchAdmin(choiceAdminTask int) {
+	var adminEditChoices int
+	var namaDataInginDihapus string
+	switch choiceAdminTask {
 	case 1:
-		fmt.Println("Berapa banyak data yang diinginkan?")
-		fmt.Scan(&nData)
-		fmt.Println("Input data-datanya")
 		tambahData()
 	case 2:
 		fmt.Println("Data apa yang ingin anda edit?")
 		fmt.Println("1. Jarak")
 		fmt.Println("2. Biaya")
 		fmt.Println("3. Jumlah Fasilitasnya")
-		fmt.Scan(&b)
-		switchDataEdit(b)
+		fmt.Scan(&adminEditChoices)
+		switchDataEdit(adminEditChoices)
 	case 3:
-		fmt.Println("Input data mana yang akan dihapus dari database")
-		fmt.Scan(&nama, &jarak)
-		idxAkun = searchData(nama, jarak)
-		hapusData(idxAkun)
+		fmt.Println("Input nama tempat wisata yang akan dihapus dari database")
+		fmt.Scan(&namaDataInginDihapus)
+		idxAkun := searchDatainginDihapus(namaDataInginDihapus)
+		if idxAkun == -1 {
+			fmt.Println("Data tidak ditemukan")
+		} else {
+			hapusData(idxAkun)
+			fmt.Println("Data berhasil dihapus")
+			fmt.Println()
+			printDatabase()
+			fmt.Println()
+		}
 	}
 }
 
-func switchUser(a int) {
-	var nama string
-	switch a {
+func switchUser(choiceUser int) {
+	var namaWisataInginDicari string
+	switch choiceUser {
 	case 1:
 		fmt.Println("Berikut adalah tempat wisata berdasarkan jarak terdekat:")
 		sortJarak()
+		fmt.Println()
 		printDatabase()
+		fmt.Println()
 	case 2:
 		fmt.Println("Berikut adalah tempat wisata berdasarkan biaya termurah:")
 		sortBiaya()
+		fmt.Println()
 		printDatabase()
+		fmt.Println()
 	case 3:
 		fmt.Println("Berikut adalah tempat wisata berdasarkan jumlah fasilitas terbanyak:")
 		sortjumFasilitas()
+		fmt.Println()
 		printDatabase()
+		fmt.Println()
 	case 4:
 		fmt.Println("Apa tempat wisata yang ingin anda cari?")
-		fmt.Scan(&nama)
-		searchDataRequest(nama)
+		fmt.Scan(&namaWisataInginDicari)
+		searchDataRequest(namaWisataInginDicari)
 	}
 }
 
-func switchDataEdit(a int) {
+func switchDataEdit(choicecDataEdit int) {
 	var jarakBaru, biayaBaru, jumFasilitasBaru int
-	var lokasi string
-	switch a {
+	var lokasiWisata string
+	switch choicecDataEdit {
 	case 1:
-		fmt.Println("Input data jarak yang baru")
-		fmt.Scan(&lokasi, &jarakBaru)
-		editDataJarak(lokasi, jarakBaru)
+		fmt.Println("Input lokasi wisata beserta data jarak yang baru")
+		fmt.Scan(&lokasiWisata, &jarakBaru)
+		editDataJarak(lokasiWisata, jarakBaru)
+		fmt.Println()
+		printDatabase()
+		fmt.Println()
 	case 2:
-		fmt.Println("Input data biaya baru")
-		fmt.Scan(&lokasi, &biayaBaru)
-		editDataBiaya(lokasi, biayaBaru)
+		fmt.Println("Input lokasi wisata beserta data biaya baru")
+		fmt.Scan(&lokasiWisata, &biayaBaru)
+		editDataBiaya(lokasiWisata, biayaBaru)
+		fmt.Println()
+		printDatabase()
+		fmt.Println()
 	case 3:
-		fmt.Println("Input data jumlah fasilitas baru")
-		fmt.Scan(&lokasi, &jumFasilitasBaru)
-		editDataJumFasilitas(lokasi, jumFasilitasBaru)
+		fmt.Println("Input lokasi wisata beserta data jumlah fasilitas baru")
+		fmt.Scan(&lokasiWisata, &jumFasilitasBaru)
+		editDataJumFasilitas(lokasiWisata, jumFasilitasBaru)
+		fmt.Println()
+		printDatabase()
+		fmt.Println()
 	}
 }
 
 func tambahData() {
 	var name string
-	var price, distance, fasilitas int
-	if nData > NMAX {
-		nData = NMAX
+	var price, distance, fasilitas, n int
+
+	fmt.Println("Berapa banyak data yang diinginkan?")
+	fmt.Scan(&n)
+	n += nData
+	if n > NMAX {
+		n = NMAX
 	}
-	for i := 0; i < *&nData; i++ {
+
+	fmt.Println("Input data-datanya")
+	for i := nData; i < n; i++ {
 		fmt.Scan(&name, &price, &distance, &fasilitas)
 		dataRekreasi[i].nama = name
 		dataRekreasi[i].biaya = price
 		dataRekreasi[i].jarak = distance
 		dataRekreasi[i].jumFasilitas = fasilitas
+		nData++
 	}
+	fmt.Println()
+	printDatabase()
+	fmt.Println()
 }
 
 func editDataJarak(nama string, jarak int) {
@@ -175,7 +206,10 @@ func searchDataRequest(nama string) {
 	var i int = 0
 	for i < nData && hasil == 0 {
 		if dataRekreasi[i].nama == nama {
+			fmt.Println()
+			fmt.Println("Berikut adalah tempat wisata yang anda cari:")
 			fmt.Println(dataRekreasi[i].nama, dataRekreasi[i].biaya, dataRekreasi[i].jarak, dataRekreasi[i].jumFasilitas)
+			fmt.Println()
 			hasil = 1
 		}
 		i++
@@ -185,27 +219,21 @@ func searchDataRequest(nama string) {
 	}
 }
 
-func searchData(nama string, jarak int) int {
-	sortJarak()
-	var le, ri, mid int
-	le = 0
-	ri = nData - 1
-	for jarak != mid && le <= ri {
-		mid = (le + ri) / 2
-		if dataRekreasi[mid].jarak > jarak {
-			ri = mid - 1
-		} else if dataRekreasi[mid].jarak < jarak {
-			le = mid + 1
-		} else {
-			mid = jarak
+func searchDatainginDihapus(nama string) int {
+	for i := 0; i < nData; i++ {
+		if dataRekreasi[i].nama == nama {
+			return i
 		}
 	}
-	return mid
+	return -1
 }
 
 func hapusData(idx int) {
-	var i int
-	for i = idx; i < nData-1; i++ {
+	if idx < 0 || idx >= nData {
+		fmt.Println("Data tidak ditemukan")
+		return
+	}
+	for i := idx; i < nData-1; i++ {
 		dataRekreasi[i] = dataRekreasi[i+1]
 	}
 	nData--
@@ -262,22 +290,26 @@ func sortjumFasilitas() {
 }
 
 func printDatabase() {
-	var name string
-	var price, distance, fasilitas int
+	fmt.Println("===============================================================")
+	fmt.Printf("| %-20s | %-10s | %-10s | %-10s |\n", "Nama", "Biaya", "Jarak", "Fasilitas")
+	fmt.Println("===============================================================")
+
 	for i := 0; i < nData; i++ {
-		name = dataRekreasi[i].nama
-		price = dataRekreasi[i].biaya
-		distance = dataRekreasi[i].jarak
-		fasilitas = dataRekreasi[i].jumFasilitas
-		fmt.Println(name, price, distance, fasilitas)
+		name := dataRekreasi[i].nama
+		price := dataRekreasi[i].biaya
+		distance := dataRekreasi[i].jarak
+		fasilitas := dataRekreasi[i].jumFasilitas
+		fmt.Printf("| %-20s | %-10d | %-10d | %-10d |\n", name, price, distance, fasilitas)
 	}
+
+	fmt.Println("===============================================================")
 }
 
 func main() {
-	var choice int
-	for choice != 3 {
+	var choiceAkun int
+	for choiceAkun != 3 {
 		menuRole()
-		fmt.Scan(&choice)
-		switchRole(choice)
+		fmt.Scan(&choiceAkun)
+		switchRole(choiceAkun)
 	}
 }
